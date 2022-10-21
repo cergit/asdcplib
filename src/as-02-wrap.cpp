@@ -1187,6 +1187,31 @@ write_JP2K_file(CommandOptions& Options)
 	      tmp_dscr->ComponentMaxRef = Options.rgba_MaxRef;
 	      tmp_dscr->ComponentMinRef = Options.rgba_MinRef;
 	      tmp_dscr->DisplayF2Offset = 0;
+
+				if ( true )
+		{
+			if (Options.component_depth == 16)
+				{
+					tmp_dscr->PixelLayout = ASDCP::MXF::RGBALayout(ASDCP::MXF::RGBAValue_RGB_16);
+				}
+			else if (Options.component_depth == 12)
+				{
+					tmp_dscr->PixelLayout = ASDCP::MXF::RGBALayout(ASDCP::MXF::RGBAValue_RGB_12);
+				}
+			else if (Options.component_depth == 10)
+				{
+					tmp_dscr->PixelLayout = ASDCP::MXF::RGBALayout(ASDCP::MXF::RGBAValue_RGB_10);
+				}
+			else if (Options.component_depth == 8)
+				{
+					tmp_dscr->PixelLayout = ASDCP::MXF::RGBALayout(ASDCP::MXF::RGBAValue_RGB_8);
+				}
+			else
+				{
+								// "Best Effort" has been made
+				}
+		}
+
 	      if (Options.line_map_flag)  tmp_dscr->VideoLineMap = Options.line_map;
 
 	      if ( Options.md_min_luminance || Options.md_max_luminance )
