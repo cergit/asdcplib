@@ -1111,7 +1111,7 @@ write_JP2K_file(CommandOptions& Options)
 	      tmp_dscr->ColorSiting = 0;
 	      tmp_dscr->DisplayF2Offset = 0;
 	      tmp_dscr->AspectRatio = Options.aspect_ratio;
-	      tmp_dscr->FieldDominance = Options.field_dominance;
+				if ( tmp_dscr->FrameLayout > 0 )  tmp_dscr->FieldDominance = Options.field_dominance;
 	      tmp_dscr->WhiteReflevel = Options.cdci_WhiteRefLevel;
 	      tmp_dscr->BlackRefLevel = Options.cdci_BlackRefLevel;
 	      tmp_dscr->ColorRange = Options.cdci_ColorRange;
