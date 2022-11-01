@@ -1111,7 +1111,7 @@ write_JP2K_file(CommandOptions& Options)
 	      tmp_dscr->ColorSiting = 0;
 	      tmp_dscr->DisplayF2Offset = 0;
 	      tmp_dscr->AspectRatio = Options.aspect_ratio;
-				if ( tmp_dscr->FrameLayout > 0 )  tmp_dscr->FieldDominance = Options.field_dominance;
+	      if ( tmp_dscr->FrameLayout > 0 )  tmp_dscr->FieldDominance = Options.field_dominance;
 	      tmp_dscr->WhiteReflevel = Options.cdci_WhiteRefLevel;
 	      tmp_dscr->BlackRefLevel = Options.cdci_BlackRefLevel;
 	      tmp_dscr->ColorRange = Options.cdci_ColorRange;
@@ -1131,7 +1131,7 @@ write_JP2K_file(CommandOptions& Options)
 
 	      essence_descriptor = static_cast<ASDCP::MXF::FileDescriptor*>(tmp_dscr);
 
-	      if ( Options.active_width || Options.active_height || Options.active_offset_x || Options.active_offset_y)
+	      if ( Options.active_width || Options.active_height || Options.active_offset_x || Options.active_offset_y )
 		{
                   tmp_dscr->ActiveWidth   = Options.active_width;
                   tmp_dscr->ActiveHeight  = Options.active_height;
@@ -1176,90 +1176,83 @@ write_JP2K_file(CommandOptions& Options)
 
 	  if ( ASDCP_SUCCESS(result) )
 	    {
-         if (Options.coding_equations != UL())
-           tmp_dscr->CodingEquations = Options.coding_equations;
-         if (Options.transfer_characteristic != UL())
-           tmp_dscr->TransferCharacteristic = Options.transfer_characteristic;
-         if (Options.color_primaries != UL())
-           tmp_dscr->ColorPrimaries = Options.color_primaries;
-	      tmp_dscr->ScanningDirection = 0;
-	      tmp_dscr->PictureEssenceCoding = Options.picture_coding;
-	      tmp_dscr->ComponentMaxRef = Options.rgba_MaxRef;
-	      tmp_dscr->ComponentMinRef = Options.rgba_MinRef;
-	      tmp_dscr->DisplayF2Offset = 0;
+	      if (Options.coding_equations != UL())
+	        tmp_dscr->CodingEquations = Options.coding_equations;
+	      if (Options.transfer_characteristic != UL())
+	        tmp_dscr->TransferCharacteristic = Options.transfer_characteristic;
+	      if (Options.color_primaries != UL())
+	        tmp_dscr->ColorPrimaries = Options.color_primaries;
+	        tmp_dscr->ScanningDirection = 0;
+	        tmp_dscr->PictureEssenceCoding = Options.picture_coding;
+	        tmp_dscr->ComponentMaxRef = Options.rgba_MaxRef;
+	        tmp_dscr->ComponentMinRef = Options.rgba_MinRef;
+	        tmp_dscr->DisplayF2Offset = 0;
 
-				if ( true )
-		{
-			if (Options.component_depth == 16)
-				{
-					tmp_dscr->PixelLayout = ASDCP::MXF::RGBALayout(ASDCP::MXF::RGBAValue_RGB_16);
-				}
-			else if (Options.component_depth == 12)
-				{
-					tmp_dscr->PixelLayout = ASDCP::MXF::RGBALayout(ASDCP::MXF::RGBAValue_RGB_12);
-				}
-			else if (Options.component_depth == 10)
-				{
-					tmp_dscr->PixelLayout = ASDCP::MXF::RGBALayout(ASDCP::MXF::RGBAValue_RGB_10);
-				}
-			else if (Options.component_depth == 8)
-				{
-					tmp_dscr->PixelLayout = ASDCP::MXF::RGBALayout(ASDCP::MXF::RGBAValue_RGB_8);
-				}
-			else
-				{
-								// "Best Effort" has been made
-				}
-		}
+	      if (Options.component_depth == 16)
+	        {
+	          tmp_dscr->PixelLayout = ASDCP::MXF::RGBALayout(ASDCP::MXF::RGBAValue_RGB_16);
+	        }
+	        else if (Options.component_depth == 12)
+	        {
+	          tmp_dscr->PixelLayout = ASDCP::MXF::RGBALayout(ASDCP::MXF::RGBAValue_RGB_12);
+	        }
+	        else if (Options.component_depth == 10)
+	        {
+	          tmp_dscr->PixelLayout = ASDCP::MXF::RGBALayout(ASDCP::MXF::RGBAValue_RGB_10);
+	        }
+	        else if (Options.component_depth == 8)
+	        {
+	          tmp_dscr->PixelLayout = ASDCP::MXF::RGBALayout(ASDCP::MXF::RGBAValue_RGB_8);
+	        }
 
 	      if (Options.line_map_flag)  tmp_dscr->VideoLineMap = Options.line_map;
 
 	      if ( Options.md_min_luminance || Options.md_max_luminance )
-		{
-		  tmp_dscr->MasteringDisplayMinimumLuminance = Options.md_min_luminance;
-		  tmp_dscr->MasteringDisplayMaximumLuminance = Options.md_max_luminance;
-		}
+	        {
+	          tmp_dscr->MasteringDisplayMinimumLuminance = Options.md_min_luminance;
+	          tmp_dscr->MasteringDisplayMaximumLuminance = Options.md_max_luminance;
+	        }
 
 	      if ( Options.md_primaries.HasValue() )
-		{
-		  tmp_dscr->MasteringDisplayPrimaries = Options.md_primaries;
-		  tmp_dscr->MasteringDisplayWhitePointChromaticity = Options.md_white_point;
-		}
+	        {
+	          tmp_dscr->MasteringDisplayPrimaries = Options.md_primaries;
+	          tmp_dscr->MasteringDisplayWhitePointChromaticity = Options.md_white_point;
+	        }
 
-	      if ( Options.active_width || Options.active_height || Options.active_offset_x || Options.active_offset_y)
-		{
-                  tmp_dscr->ActiveWidth   = Options.active_width;
-                  tmp_dscr->ActiveHeight  = Options.active_height;
-                  tmp_dscr->ActiveXOffset = Options.active_offset_x;
-                  tmp_dscr->ActiveYOffset = Options.active_offset_y;
-		}
+	      if ( Options.active_width || Options.active_height || Options.active_offset_x || Options.active_offset_y )
+	        {
+	          tmp_dscr->ActiveWidth   = Options.active_width;
+	          tmp_dscr->ActiveHeight  = Options.active_height;
+	          tmp_dscr->ActiveXOffset = Options.active_offset_x;
+	          tmp_dscr->ActiveYOffset = Options.active_offset_y;
+	        }
 
 	      essence_descriptor = static_cast<ASDCP::MXF::FileDescriptor*>(tmp_dscr);
 
 	      if (Options.write_j2clayout)
-		{
-		  jp2k_sub_descriptor = static_cast<ASDCP::MXF::JPEG2000PictureSubDescriptor*>(essence_sub_descriptors.back());
-		  if (Options.component_depth == 16)
-		    {
-		      jp2k_sub_descriptor->J2CLayout = ASDCP::MXF::RGBALayout(ASDCP::MXF::RGBAValue_RGB_16);
-		    }
-		  else if (Options.component_depth == 12)
-		    {
-		      jp2k_sub_descriptor->J2CLayout = ASDCP::MXF::RGBALayout(ASDCP::MXF::RGBAValue_RGB_12);
-		    }
-		  else if (Options.component_depth == 10)
-		    {
-		      jp2k_sub_descriptor->J2CLayout = ASDCP::MXF::RGBALayout(ASDCP::MXF::RGBAValue_RGB_10);
-		    }
-		  else if (Options.component_depth == 8)
-		    {
-		      jp2k_sub_descriptor->J2CLayout = ASDCP::MXF::RGBALayout(ASDCP::MXF::RGBAValue_RGB_8);
-		    }
-		  else
-		    {
-		      fprintf(stderr, "Warning: could not determine J2CLayout to write.\n");
-		    }
-		}
+	        {
+	          jp2k_sub_descriptor = static_cast<ASDCP::MXF::JPEG2000PictureSubDescriptor*>(essence_sub_descriptors.back());
+	          if (Options.component_depth == 16)
+	            {
+	              jp2k_sub_descriptor->J2CLayout = ASDCP::MXF::RGBALayout(ASDCP::MXF::RGBAValue_RGB_16);
+	            }
+	          else if (Options.component_depth == 12)
+	            {
+	              jp2k_sub_descriptor->J2CLayout = ASDCP::MXF::RGBALayout(ASDCP::MXF::RGBAValue_RGB_12);
+	            }
+	          else if (Options.component_depth == 10)
+	            {
+	              jp2k_sub_descriptor->J2CLayout = ASDCP::MXF::RGBALayout(ASDCP::MXF::RGBAValue_RGB_10);
+	            }
+	          else if (Options.component_depth == 8)
+	            {
+	              jp2k_sub_descriptor->J2CLayout = ASDCP::MXF::RGBALayout(ASDCP::MXF::RGBAValue_RGB_8);
+	            }
+	          else
+	            {
+	              fprintf(stderr, "Warning: could not determine J2CLayout to write.\n");
+	            }
+	        }
 	    }
 	}
     }
