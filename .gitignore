@@ -61,6 +61,8 @@ build-aux/missing
 src/as-02-info
 src/as-02-unwrap
 src/as-02-wrap
+src/as-02-wrap-iab
+src/as-02-wrap-jxs
 src/asdcp-info
 src/asdcp-test
 src/asdcp-unwrap
