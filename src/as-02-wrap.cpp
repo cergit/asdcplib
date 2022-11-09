@@ -177,6 +177,8 @@ Options:\n\
   -q <UL>           - Set the CodingEquations UL\n\
   -r <n>/<d>        - Edit Rate of the output file.  24/1 is the default\n\
   -R                - Indicates RGB image essence (default except with -c)\n\
+  -S <width>,<height>,<x-offset>,<y-offset> \n\
+                    - Use provided Sampled Rectangle parameters\n\
   -s <seconds>      - Duration of a frame-wrapped partition (default 60)\n\
   -t <min>          - Set RGB component minimum code value (default: 0)\n\
   -T <max>          - Set RGB component maximum code value (default: 1023)\n\
@@ -313,6 +315,11 @@ public:
   ui32_t cdci_WhiteRefLevel;
   ui32_t cdci_ColorRange;
 
+  ui32_t sampled_width;
+  ui32_t sampled_height;
+  ui32_t sampled_offset_x;
+  ui32_t sampled_offset_y;
+
   ui32_t display_width;
   ui32_t display_height;
   ui32_t display_offset_x;
@@ -393,6 +400,26 @@ public:
 	fprintf(stderr, "Unexpected CDCI video referece levels.\n");
 	return false;
       }
+
+    return true;
+  }
+
+  //
+  bool set_sampled_rectangle(const std::string& arg)
+  {
+    std::list<std::string> sampled_rectangle = Kumu::km_token_split(arg, ",");
+    if ( sampled_rectangle.size() != 4 )
+      {
+	fprintf(stderr, "Expecting four parameters for sampled rectangle.\n");
+	return false;
+      }
+
+    std::list<std::string>::const_iterator i = sampled_rectangle.begin();
+
+    sampled_width    = strtol((*(i++)).c_str(), 0, 10);
+    sampled_height   = strtol((*(i++)).c_str(), 0, 10);
+    sampled_offset_x = strtol((*(i++)).c_str(), 0, 10);
+    sampled_offset_y = strtol((*(i++)).c_str(), 0, 10);
 
     return true;
   }
@@ -579,6 +606,7 @@ public:
     mca_config(g_dict), rgba_MaxRef(1023), rgba_MinRef(0),
     horizontal_subsampling(2), vertical_subsampling(2), component_depth(10),
     frame_layout(0), aspect_ratio(ASDCP::Rational(4,3)), aspect_ratio_flag(false), field_dominance(0),
+    sampled_width(0), sampled_height(0), sampled_offset_x(0), sampled_offset_y(0),
     display_width(0), display_height(0), display_offset_x(0), display_offset_y(0),
     active_width(0), active_height(0), active_offset_y(0), active_offset_x(0),
     mxf_header_size(16384), cdci_WhiteRefLevel(940), cdci_BlackRefLevel(64), cdci_ColorRange(897),
@@ -917,6 +945,14 @@ public:
 		use_cdci_descriptor = false;
 		break;
 
+	      case 'S':
+		TEST_EXTRA_ARG(i, 'S');
+		if ( ! set_sampled_rectangle(argv[i]) )
+		  {
+		    return;
+		  }
+		break;
+
 	      case 's':
 		TEST_EXTRA_ARG(i, 's');
 		partition_space = Kumu::xabs(strtol(argv[i], 0, 10));
@@ -1167,6 +1203,14 @@ write_JP2K_file(CommandOptions& Options)
 
 	      essence_descriptor = static_cast<ASDCP::MXF::FileDescriptor*>(tmp_dscr);
 
+	      if ( Options.sampled_width || Options.sampled_height || Options.sampled_offset_x || Options.sampled_offset_y )
+	        {
+	          tmp_dscr->SampledWidth   = Options.sampled_width;
+	          tmp_dscr->SampledHeight  = Options.sampled_height;
+	          tmp_dscr->SampledXOffset = Options.sampled_offset_x;
+	          tmp_dscr->SampledYOffset = Options.sampled_offset_y;
+	        }
+
 	      if ( Options.display_width || Options.display_height || Options.display_offset_x || Options.display_offset_y )
 	        {
 	          tmp_dscr->DisplayWidth   = Options.display_width;
@@ -1261,6 +1305,14 @@ write_JP2K_file(CommandOptions& Options)
 	        {
 	          tmp_dscr->MasteringDisplayPrimaries = Options.md_primaries;
 	          tmp_dscr->MasteringDisplayWhitePointChromaticity = Options.md_white_point;
+	        }
+
+	      if ( Options.sampled_width || Options.sampled_height || Options.sampled_offset_x || Options.sampled_offset_y )
+	        {
+	          tmp_dscr->SampledWidth   = Options.sampled_width;
+	          tmp_dscr->SampledHeight  = Options.sampled_height;
+	          tmp_dscr->SampledXOffset = Options.sampled_offset_x;
+	          tmp_dscr->SampledYOffset = Options.sampled_offset_y;
 	        }
 
 	      if ( Options.display_width || Options.display_height || Options.display_offset_x || Options.display_offset_y )
