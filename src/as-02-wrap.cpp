@@ -111,7 +111,7 @@ void
 banner(FILE* stream = stdout)
 {
   fprintf(stream, "\n\
-%s (asdcplib %s)\n\n\
+%s (cergit/asdcplib/mc/mast-1313 %s)\n\n\
 Copyright (c) 2011-2018, Robert Scheler, Heiko Sparenberg Fraunhofer IIS, John Hurst\n\n\
 asdcplib may be copied only under the terms of the license found at\n\
 the top of every file in the asdcplib distribution kit.\n\n\
@@ -155,17 +155,19 @@ Options:\n\
                       Stream. May be issued multiple times.\n\
   -i                - Indicates input essence is interlaced fields (forces -Y)\n\
   -j <key-id-str>   - Write key ID instead of creating a random value\n\
-  -L <ul>           - Use provided Color Primaries UL \n\
   -J                - Write J2CLayout\n\
   -k <key-string>   - Use key for ciphertext operations\n\
-  -N <width>,<height>,<x-offset>,<y-offset> \n\
-                    - Use provided Active Area parameters\n\
+  -K <width>,<height>,<x-offset>,<y-offset> \n\
+                    - Use provided Display Rectangle parameters\n\
   -l <first>,<second>\n\
                     - Integer values that set the VideoLineMap\n\
+  -L <ul>           - Use provided Color Primaries UL \n\
   -m <expr>         - Write MCA labels using <expr>.  Example:\n\
                         51(L,R,C,LFE,Ls,Rs,),HI,VIN\n\
   -M                - Do not create HMAC values when writing\n\
   -n <UL>           - Set the TransferCharacteristic UL\n\
+  -N <width>,<height>,<x-offset>,<y-offset> \n\
+                    - Use provided Active Area parameters\n\
   -o <min>,<max>    - Mastering Display luminance, cd*m*m, e.g., \".05,100\"\n\
   -O <rx>,<ry>,<gx>,<gy>,<bx>,<by>,<wx>,<wy>\n\
                     - Mastering Display Color Primaries and white point\n\
@@ -175,6 +177,8 @@ Options:\n\
   -q <UL>           - Set the CodingEquations UL\n\
   -r <n>/<d>        - Edit Rate of the output file.  24/1 is the default\n\
   -R                - Indicates RGB image essence (default except with -c)\n\
+  -S <width>,<height>,<x-offset>,<y-offset> \n\
+                    - Use provided Sampled Rectangle parameters\n\
   -s <seconds>      - Duration of a frame-wrapped partition (default 60)\n\
   -t <min>          - Set RGB component minimum code value (default: 0)\n\
   -T <max>          - Set RGB component maximum code value (default: 1023)\n\
@@ -311,6 +315,16 @@ public:
   ui32_t cdci_WhiteRefLevel;
   ui32_t cdci_ColorRange;
 
+  ui32_t sampled_width;
+  ui32_t sampled_height;
+  ui32_t sampled_offset_x;
+  ui32_t sampled_offset_y;
+
+  ui32_t display_width;
+  ui32_t display_height;
+  ui32_t display_offset_x;
+  ui32_t display_offset_y;
+
   ui32_t active_width;
   ui32_t active_height;
   ui32_t active_offset_x;
@@ -386,6 +400,46 @@ public:
 	fprintf(stderr, "Unexpected CDCI video referece levels.\n");
 	return false;
       }
+
+    return true;
+  }
+
+  //
+  bool set_sampled_rectangle(const std::string& arg)
+  {
+    std::list<std::string> sampled_rectangle = Kumu::km_token_split(arg, ",");
+    if ( sampled_rectangle.size() != 4 )
+      {
+	fprintf(stderr, "Expecting four parameters for sampled rectangle.\n");
+	return false;
+      }
+
+    std::list<std::string>::const_iterator i = sampled_rectangle.begin();
+
+    sampled_width    = strtol((*(i++)).c_str(), 0, 10);
+    sampled_height   = strtol((*(i++)).c_str(), 0, 10);
+    sampled_offset_x = strtol((*(i++)).c_str(), 0, 10);
+    sampled_offset_y = strtol((*(i++)).c_str(), 0, 10);
+
+    return true;
+  }
+
+  //
+  bool set_display_rectangle(const std::string& arg)
+  {
+    std::list<std::string> display_rectangle = Kumu::km_token_split(arg, ",");
+    if ( display_rectangle.size() != 4 )
+      {
+	fprintf(stderr, "Expecting four parameters for display rectangle.\n");
+	return false;
+      }
+
+    std::list<std::string>::const_iterator i = display_rectangle.begin();
+
+    display_width    = strtol((*(i++)).c_str(), 0, 10);
+    display_height   = strtol((*(i++)).c_str(), 0, 10);
+    display_offset_x = strtol((*(i++)).c_str(), 0, 10);
+    display_offset_y = strtol((*(i++)).c_str(), 0, 10);
 
     return true;
   }
@@ -552,6 +606,8 @@ public:
     mca_config(g_dict), rgba_MaxRef(1023), rgba_MinRef(0),
     horizontal_subsampling(2), vertical_subsampling(2), component_depth(10),
     frame_layout(0), aspect_ratio(ASDCP::Rational(4,3)), aspect_ratio_flag(false), field_dominance(0),
+    sampled_width(0), sampled_height(0), sampled_offset_x(0), sampled_offset_y(0),
+    display_width(0), display_height(0), display_offset_x(0), display_offset_y(0),
     active_width(0), active_height(0), active_offset_y(0), active_offset_x(0),
     mxf_header_size(16384), cdci_WhiteRefLevel(940), cdci_BlackRefLevel(64), cdci_ColorRange(897),
     md_min_luminance(0), md_max_luminance(0), line_map(0,0), line_map_flag(false),
@@ -785,6 +841,14 @@ public:
 		}
 		break;
 
+	      case 'K':
+		TEST_EXTRA_ARG(i, 'K');
+		if ( ! set_display_rectangle(argv[i]) )
+		  {
+		    return;
+		  }
+		break;
+
 	      case 'l':
 		TEST_EXTRA_ARG(i, 'y');
 		if ( ! set_video_line_map(argv[i]) )
@@ -879,6 +943,14 @@ public:
 
 	      case 'R':
 		use_cdci_descriptor = false;
+		break;
+
+	      case 'S':
+		TEST_EXTRA_ARG(i, 'S');
+		if ( ! set_sampled_rectangle(argv[i]) )
+		  {
+		    return;
+		  }
 		break;
 
 	      case 's':
@@ -1118,51 +1190,67 @@ write_JP2K_file(CommandOptions& Options)
 	      if (Options.line_map_flag)  tmp_dscr->VideoLineMap = Options.line_map;
 
 	      if ( Options.md_min_luminance || Options.md_max_luminance )
-		{
-		  tmp_dscr->MasteringDisplayMinimumLuminance = Options.md_min_luminance;
-		  tmp_dscr->MasteringDisplayMaximumLuminance = Options.md_max_luminance;
-		}
+	        {
+	          tmp_dscr->MasteringDisplayMinimumLuminance = Options.md_min_luminance;
+	          tmp_dscr->MasteringDisplayMaximumLuminance = Options.md_max_luminance;
+	        }
 
 	      if ( Options.md_primaries.HasValue() )
-		{
-		  tmp_dscr->MasteringDisplayPrimaries = Options.md_primaries;
-		  tmp_dscr->MasteringDisplayWhitePointChromaticity = Options.md_white_point;
-		}
+	        {
+	          tmp_dscr->MasteringDisplayPrimaries = Options.md_primaries;
+	          tmp_dscr->MasteringDisplayWhitePointChromaticity = Options.md_white_point;
+	        }
 
 	      essence_descriptor = static_cast<ASDCP::MXF::FileDescriptor*>(tmp_dscr);
 
+	      if ( Options.sampled_width || Options.sampled_height || Options.sampled_offset_x || Options.sampled_offset_y )
+	        {
+	          tmp_dscr->SampledWidth   = Options.sampled_width;
+	          tmp_dscr->SampledHeight  = Options.sampled_height;
+	          tmp_dscr->SampledXOffset = Options.sampled_offset_x;
+	          tmp_dscr->SampledYOffset = Options.sampled_offset_y;
+	        }
+
+	      if ( Options.display_width || Options.display_height || Options.display_offset_x || Options.display_offset_y )
+	        {
+	          tmp_dscr->DisplayWidth   = Options.display_width;
+	          tmp_dscr->DisplayHeight  = Options.display_height;
+	          tmp_dscr->DisplayXOffset = Options.display_offset_x;
+	          tmp_dscr->DisplayYOffset = Options.display_offset_y;
+	        }
+
 	      if ( Options.active_width || Options.active_height || Options.active_offset_x || Options.active_offset_y )
-		{
-                  tmp_dscr->ActiveWidth   = Options.active_width;
-                  tmp_dscr->ActiveHeight  = Options.active_height;
-                  tmp_dscr->ActiveXOffset = Options.active_offset_x;
-                  tmp_dscr->ActiveYOffset = Options.active_offset_y;
-		}
+	        {
+	          tmp_dscr->ActiveWidth   = Options.active_width;
+	          tmp_dscr->ActiveHeight  = Options.active_height;
+	          tmp_dscr->ActiveXOffset = Options.active_offset_x;
+	          tmp_dscr->ActiveYOffset = Options.active_offset_y;
+	        }
 
 	      if (Options.write_j2clayout)
-		{
-		  jp2k_sub_descriptor = static_cast<ASDCP::MXF::JPEG2000PictureSubDescriptor*>(essence_sub_descriptors.back());
-		  if (Options.component_depth == 16)
-		    {
-		      jp2k_sub_descriptor->J2CLayout = ASDCP::MXF::RGBALayout(ASDCP::MXF::RGBAValue_YUV_16);
-		    }
+	        {
+	          jp2k_sub_descriptor = static_cast<ASDCP::MXF::JPEG2000PictureSubDescriptor*>(essence_sub_descriptors.back());
+	          if (Options.component_depth == 16)
+	            {
+	              jp2k_sub_descriptor->J2CLayout = ASDCP::MXF::RGBALayout(ASDCP::MXF::RGBAValue_YUV_16);
+	            }
 		  else if (Options.component_depth == 12)
-		    {
-		      jp2k_sub_descriptor->J2CLayout = ASDCP::MXF::RGBALayout(ASDCP::MXF::RGBAValue_YUV_12);
-		    }
+	            {
+	              jp2k_sub_descriptor->J2CLayout = ASDCP::MXF::RGBALayout(ASDCP::MXF::RGBAValue_YUV_12);
+	            }
 		  else if (Options.component_depth == 10)
-		    {
-		      jp2k_sub_descriptor->J2CLayout = ASDCP::MXF::RGBALayout(ASDCP::MXF::RGBAValue_YUV_10);
-		    }
+	            {
+	              jp2k_sub_descriptor->J2CLayout = ASDCP::MXF::RGBALayout(ASDCP::MXF::RGBAValue_YUV_10);
+	            }
 		  else if (Options.component_depth == 8)
-		    {
-		      jp2k_sub_descriptor->J2CLayout = ASDCP::MXF::RGBALayout(ASDCP::MXF::RGBAValue_YUV_8);
-		    }
+	            {
+	              jp2k_sub_descriptor->J2CLayout = ASDCP::MXF::RGBALayout(ASDCP::MXF::RGBAValue_YUV_8);
+	            }
 		  else
-		    {
-		      fprintf(stderr, "Warning: could not determine J2CLayout to write.\n");
-		    }
-		}
+	            {
+	              fprintf(stderr, "Warning: could not determine J2CLayout to write.\n");
+	            }
+	        }
 	    }
 	}
       else
@@ -1217,6 +1305,22 @@ write_JP2K_file(CommandOptions& Options)
 	        {
 	          tmp_dscr->MasteringDisplayPrimaries = Options.md_primaries;
 	          tmp_dscr->MasteringDisplayWhitePointChromaticity = Options.md_white_point;
+	        }
+
+	      if ( Options.sampled_width || Options.sampled_height || Options.sampled_offset_x || Options.sampled_offset_y )
+	        {
+	          tmp_dscr->SampledWidth   = Options.sampled_width;
+	          tmp_dscr->SampledHeight  = Options.sampled_height;
+	          tmp_dscr->SampledXOffset = Options.sampled_offset_x;
+	          tmp_dscr->SampledYOffset = Options.sampled_offset_y;
+	        }
+
+	      if ( Options.display_width || Options.display_height || Options.display_offset_x || Options.display_offset_y )
+	        {
+	          tmp_dscr->DisplayWidth   = Options.display_width;
+	          tmp_dscr->DisplayHeight  = Options.display_height;
+	          tmp_dscr->DisplayXOffset = Options.display_offset_x;
+	          tmp_dscr->DisplayYOffset = Options.display_offset_y;
 	        }
 
 	      if ( Options.active_width || Options.active_height || Options.active_offset_x || Options.active_offset_y )
