@@ -55,6 +55,7 @@ auto-tooled version by untarring the distribution and running
 `autoreconf` in its root directory as follows:
 
 ```sh
+libtoolize  // needed build on RHEL 8.5
 autoreconf -if
 ./configure --enable-as-02
 make
