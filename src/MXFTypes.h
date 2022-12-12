@@ -632,7 +632,8 @@ namespace ASDCP
       byte_t const RGBAValue_YUV_12[RGBAValueLength] = { 'Y', 12, 'U', 12, 'V', 12, 0, 0 };
       byte_t const RGBAValue_YUV_10[RGBAValueLength] = { 'Y', 10, 'U', 10, 'V', 10, 0, 0 };
       byte_t const RGBAValue_YUV_8[RGBAValueLength]  = { 'Y', 8,  'U', 8,  'V', 8,  0, 0 };
-      byte_t const RGBAValue_DCDM[RGBAValueLength] = { 0xd8, 10, 0xd9, 10, 0xda, 10, 0, 0 };
+      byte_t const RGBAValue_DCDM[RGBAValueLength]    = { 0xd8, 10, 0xd9, 10, 0xda, 10, 0, 0 };
+      byte_t const RGBAValue_DCDM_12[RGBAValueLength] = { 0xd8, 12, 0xd9, 12, 0xda, 12, 0, 0 };
 
 
       class RGBALayout : public Kumu::IArchive
