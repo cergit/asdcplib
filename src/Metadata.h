@@ -782,7 +782,7 @@ namespace ASDCP
 	  GenericDataEssenceDescriptor();
 
 	public:
-          UL DataEssenceCoding;
+          optional_property<UL > DataEssenceCoding;
 
       GenericDataEssenceDescriptor(const Dictionary* d);
       GenericDataEssenceDescriptor(const GenericDataEssenceDescriptor& rhs);
