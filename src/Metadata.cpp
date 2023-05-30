@@ -3214,7 +3214,7 @@ GenericDataEssenceDescriptor::InitFromTLVSet(TLVReader& TLVSet)
 {
   assert(m_Dict);
   Result_t result = FileDescriptor::InitFromTLVSet(TLVSet);
-  if ( ASDCP_SUCCESS(result) ) result = TLVSet.ReadObject(OBJ_READ_ARGS(GenericDataEssenceDescriptor, DataEssenceCoding));
+  if ( ASDCP_SUCCESS(result) ) result = TLVSet.ReadObject(OBJ_READ_ARGS_OPT(GenericDataEssenceDescriptor, DataEssenceCoding));
   return result;
 }
 
@@ -3224,7 +3224,7 @@ GenericDataEssenceDescriptor::WriteToTLVSet(TLVWriter& TLVSet)
 {
   assert(m_Dict);
   Result_t result = FileDescriptor::WriteToTLVSet(TLVSet);
-  if ( ASDCP_SUCCESS(result) ) result = TLVSet.WriteObject(OBJ_WRITE_ARGS(GenericDataEssenceDescriptor, DataEssenceCoding));
+  if ( ASDCP_SUCCESS(result) && ! DataEssenceCoding.empty() )  result = TLVSet.WriteObject(OBJ_WRITE_ARGS_OPT(GenericDataEssenceDescriptor, DataEssenceCoding));
   return result;
 }
 
@@ -3254,7 +3254,7 @@ GenericDataEssenceDescriptor::Dump(FILE* stream)
     stream = stderr;
 
   FileDescriptor::Dump(stream);
-  fprintf(stream, "  %22s = %s\n",  "DataEssenceCoding", DataEssenceCoding.EncodeString(identbuf, IdentBufferLen));
+  fprintf(stream, "  %22s = %s\n",  "DataEssenceCoding", DataEssenceCoding.get().EncodeString(identbuf, IdentBufferLen));
 }
 
 //

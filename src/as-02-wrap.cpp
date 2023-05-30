@@ -1944,6 +1944,10 @@ write_timed_text_file(CommandOptions& Options)
       TDesc.EditRate = Options.edit_rate;
       TDesc.ContainerDuration = Options.duration;
       TDesc.LanguageList = Options.language.length() ? Options.language : Parser.GetLanguage();
+      if ( Options.asset_id_flag )
+	  memcpy(TDesc.AssetID, Options.asset_id_value, UUIDlen);
+      else
+	  Kumu::GenRandomUUID(TDesc.AssetID);
       FrameBuffer.Capacity(Options.fb_size);
 
       if ( ! Options.profile_name.empty() )
@@ -1963,10 +1967,7 @@ write_timed_text_file(CommandOptions& Options)
       WriterInfo Info = s_MyInfo;  // fill in your favorite identifiers here
       Info.LabelSetType = LS_MXF_SMPTE;
 
-      if ( Options.asset_id_flag )
-	memcpy(Info.AssetUUID, Options.asset_id_value, UUIDlen);
-      else
-	Kumu::GenRandomUUID(Info.AssetUUID);
+      memcpy(Info.AssetUUID, TDesc.AssetID, UUIDlen);
 
 #ifdef HAVE_OPENSSL
       // configure encryption
