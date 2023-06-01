@@ -111,7 +111,7 @@ void
 banner(FILE* stream = stdout)
 {
   fprintf(stream, "\n\
-%s (cergit/asdcplib/mc/mast-1325 %s)\n\n\
+%s (cergit/asdcplib/mc/mast-1778 %s)\n\n\
 Copyright (c) 2011-2018, Robert Scheler, Heiko Sparenberg Fraunhofer IIS, John Hurst\n\n\
 asdcplib may be copied only under the terms of the license found at\n\
 the top of every file in the asdcplib distribution kit.\n\n\
